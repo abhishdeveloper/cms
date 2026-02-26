@@ -153,8 +153,24 @@
                 document.getElementById('phone').disabled = true;
 
                 alert('Verified! You can now checkout.');
+                trackAbandonedCart(); // Track cart as soon as user is verified
+                setInterval(trackAbandonedCart, 60000); // Track every minute
             } catch (e) {
                 alert(e.message);
+            }
+        }
+
+        async function trackAbandonedCart() {
+            if (!userId || cart.length === 0) return;
+
+            try {
+                await fetch('/api/track-cart', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ cart_items: cart })
+                });
+            } catch (e) {
+                console.error("Tracking failed", e);
             }
         }
 

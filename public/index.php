@@ -48,6 +48,16 @@ switch ($requestUri) {
         }
         break;
 
+    case '/api/track-cart':
+        if ($requestMethod === 'POST') {
+            $controller = new CartController();
+            $controller->track();
+        } else {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+        }
+        break;
+
     case '/checkout':
         if ($requestMethod === 'POST') {
             $controller = new CheckoutController();
