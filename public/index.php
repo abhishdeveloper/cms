@@ -21,6 +21,31 @@ switch ($requestUri) {
         $controller->index();
         break;
 
+    case '/product':
+        $controller = new ProductController();
+        $controller->show();
+        break;
+
+    case '/product/review':
+        if ($requestMethod === 'POST') {
+            $controller = new ProductController();
+            $controller->storeReview();
+        } else {
+            http_response_code(405);
+            echo "Method Not Allowed";
+        }
+        break;
+
+    case '/search':
+        $controller = new SearchController();
+        $controller->index();
+        break;
+
+    case '/category':
+        $controller = new SearchController();
+        $controller->category();
+        break;
+
     case '/cart':
         require_once __DIR__ . '/../views/cart.php';
         break;
@@ -113,6 +138,18 @@ switch ($requestUri) {
     case '/admin/dashboard':
         $controller = new AdminController();
         $controller->dashboard();
+        break;
+    case '/admin/categories':
+        $controller = new AdminController();
+        $controller->categories();
+        break;
+    case '/admin/categories/store':
+        $controller = new AdminController();
+        $controller->storeCategory();
+        break;
+    case '/admin/categories/delete':
+        $controller = new AdminController();
+        $controller->deleteCategory();
         break;
     case '/admin/products':
         $controller = new AdminController();

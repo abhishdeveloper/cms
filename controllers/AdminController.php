@@ -28,8 +28,10 @@ class AdminController
 
     public function products()
     {
-        $stmt = $this->db->query("SELECT * FROM products ORDER BY created_at DESC");
+        $stmt = $this->db->query("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC");
         $products = $stmt->fetchAll();
+        $stmt = $this->db->query("SELECT * FROM categories ORDER BY name ASC");
+        $categories = $stmt->fetchAll();
         require __DIR__ . '/../views/admin/products.php';
     }
 
@@ -65,6 +67,39 @@ class AdminController
         require __DIR__ . '/../views/admin/coupons.php';
     }
 
+    public function categories()
+    {
+        $stmt = $this->db->query("SELECT * FROM categories ORDER BY name ASC");
+        $categories = $stmt->fetchAll();
+        require __DIR__ . '/../views/admin/categories.php';
+    }
+
+    public function storeCategory()
+    {
+        $name = $_POST['name'];
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
+        $imageUrl = '';
+
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
+                $filename = uniqid('cat_') . '.' . $ext;
+                move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/../public/uploads/' . $filename);
+                $imageUrl = '/uploads/' . $filename;
+            }
+        }
+
+        $this->db->query("INSERT INTO categories (name, slug, image_url) VALUES (?, ?, ?)", [$name, $slug, $imageUrl]);
+        header('Location: /admin/categories');
+    }
+
+    public function deleteCategory()
+    {
+        $id = $_POST['id'];
+        $this->db->query("DELETE FROM categories WHERE id = ?", [$id]);
+        header('Location: /admin/categories');
+    }
+
     public function updateOrderStatus()
     {
         $id = $_POST['id'];
@@ -89,8 +124,11 @@ class AdminController
         $price = $_POST['price'];
         $description = $_POST['description'];
         $stock = $_POST['stock'];
+        $categoryId = $_POST['category_id'] ?: null;
         $imageUrl = '';
+        $galleryImages = [];
 
+        // Main Image
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
             if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
@@ -100,9 +138,25 @@ class AdminController
             }
         }
 
+        // Gallery Images
+        if (isset($_FILES['gallery']) && is_array($_FILES['gallery']['name'])) {
+            foreach ($_FILES['gallery']['name'] as $key => $val) {
+                if ($_FILES['gallery']['error'][$key] === UPLOAD_ERR_OK) {
+                    $ext = pathinfo($_FILES['gallery']['name'][$key], PATHINFO_EXTENSION);
+                    if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) {
+                        $filename = uniqid('prod_gal_') . '.' . $ext;
+                        move_uploaded_file($_FILES['gallery']['tmp_name'][$key], __DIR__ . '/../public/uploads/' . $filename);
+                        $galleryImages[] = '/uploads/' . $filename;
+                    }
+                }
+            }
+        }
+
+        $galleryJson = json_encode($galleryImages);
+
         $this->db->query(
-            "INSERT INTO products (name, price, description, stock, image_url) VALUES (?, ?, ?, ?, ?)",
-            [$name, $price, $description, $stock, $imageUrl]
+            "INSERT INTO products (name, price, description, stock, image_url, category_id, gallery_images) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [$name, $price, $description, $stock, $imageUrl, $categoryId, $galleryJson]
         );
 
         header('Location: /admin/products');

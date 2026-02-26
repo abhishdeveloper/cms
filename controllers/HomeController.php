@@ -12,13 +12,18 @@ class HomeController
     public function index()
     {
         try {
-            $stmt = $this->db->query("SELECT * FROM products");
+            // Fetch categories for menu/display
+            $stmt = $this->db->query("SELECT * FROM categories ORDER BY name ASC");
+            $categories = $stmt->fetchAll();
+
+            // Fetch featured products (random 8)
+            $stmt = $this->db->query("SELECT * FROM products ORDER BY RAND() LIMIT 8");
             $products = $stmt->fetchAll();
 
-            // Pass products to the view
+            // Pass data to the view
             require __DIR__ . '/../views/index.php';
         } catch (Exception $e) {
-            die("Error fetching products: " . $e->getMessage());
+            die("Error fetching home data: " . $e->getMessage());
         }
     }
 }

@@ -17,12 +17,25 @@
             <textarea name="description" class="w-full border p-2 rounded"></textarea>
         </div>
         <div>
+            <label class="block text-sm font-bold mb-2">Category</label>
+            <select name="category_id" class="w-full border p-2 rounded">
+                <option value="">Select Category</option>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
             <label class="block text-sm font-bold mb-2">Stock</label>
             <input type="number" name="stock" class="w-full border p-2 rounded" required>
         </div>
         <div>
-            <label class="block text-sm font-bold mb-2">Image</label>
+            <label class="block text-sm font-bold mb-2">Main Image</label>
             <input type="file" name="image" class="w-full border p-2 rounded">
+        </div>
+        <div>
+            <label class="block text-sm font-bold mb-2">Gallery Images</label>
+            <input type="file" name="gallery[]" multiple class="w-full border p-2 rounded">
         </div>
     </div>
     <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Add Product</button>

@@ -12,6 +12,7 @@
     <div class="h-16 flex items-center justify-center font-bold text-xl border-b border-gray-700">Admin Panel</div>
     <nav class="flex-1 p-4 space-y-2">
         <a href="/admin/dashboard" class="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</a>
+        <a href="/admin/categories" class="block py-2 px-4 rounded hover:bg-gray-700">Categories</a>
         <a href="/admin/products" class="block py-2 px-4 rounded hover:bg-gray-700">Products</a>
         <a href="/admin/orders" class="block py-2 px-4 rounded hover:bg-gray-700">Orders</a>
         <a href="/admin/coupons" class="block py-2 px-4 rounded hover:bg-gray-700">Coupons</a>
