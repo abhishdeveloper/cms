@@ -61,29 +61,74 @@ class AuthController
             $conn = $this->db->getConnection();
 
             // Check if user exists
-            $stmt = $this->db->query("SELECT id FROM users WHERE phone = ?", [$phone]);
+            $stmt = $this->db->query("SELECT * FROM users WHERE phone = ?", [$phone]);
             $user = $stmt->fetch();
 
             if ($user) {
                 $userId = $user['id'];
+                $role = $user['role'];
             } else {
-                // Create new user
-                $this->db->query("INSERT INTO users (phone, name, is_verified) VALUES (?, ?, 1)", [$phone, $name]);
+                // Create new user (default customer)
+                $this->db->query("INSERT INTO users (phone, name, is_verified, role) VALUES (?, ?, 1, 'customer')", [$phone, $name]);
                 $userId = $conn->lastInsertId();
+                $role = 'customer';
             }
 
             // Set session
             $_SESSION['user_id'] = $userId;
             $_SESSION['user_phone'] = $phone;
+            $_SESSION['role'] = $role;
 
             // Clear OTP
             unset($_SESSION["otp_{$phone}"]);
 
-            echo json_encode(['status' => 'success', 'user_id' => $userId]);
+            echo json_encode(['status' => 'success', 'user_id' => $userId, 'role' => $role]);
 
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
         }
+    }
+
+    public function loginPassword()
+    {
+        header('Content-Type: application/json');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $email = $input['email'] ?? '';
+        $password = $input['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Email and password are required']);
+            return;
+        }
+
+        try {
+            $stmt = $this->db->query("SELECT * FROM users WHERE email = ?", [$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password_hash'])) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_phone'] = $user['phone'];
+                $_SESSION['role'] = $user['role'];
+
+                echo json_encode(['status' => 'success', 'redirect' => $user['role'] === 'admin' ? '/admin/dashboard' : '/']);
+            } else {
+                http_response_code(401);
+                echo json_encode(['error' => 'Invalid credentials']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function logout()
+    {
+        session_destroy();
+        header('Location: /');
+        exit;
     }
 }

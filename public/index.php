@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../autoload.php';
+require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 
 // Simple Router
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -28,10 +29,31 @@ switch ($requestUri) {
         require_once __DIR__ . '/../views/success.php';
         break;
 
+    case '/login':
+        if ($requestMethod === 'GET') {
+            require_once __DIR__ . '/../views/login.php';
+        }
+        break;
+
+    case '/logout':
+        $controller = new AuthController();
+        $controller->logout();
+        break;
+
     case '/api/login':
         if ($requestMethod === 'POST') {
             $controller = new AuthController();
             $controller->login();
+        } else {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+        }
+        break;
+
+    case '/api/login-password':
+        if ($requestMethod === 'POST') {
+            $controller = new AuthController();
+            $controller->loginPassword();
         } else {
             http_response_code(405);
             echo json_encode(['error' => 'Method Not Allowed']);
@@ -85,6 +107,62 @@ switch ($requestUri) {
             http_response_code(405);
             echo "Method Not Allowed";
         }
+        break;
+
+    // Admin Routes
+    case '/admin/dashboard':
+        $controller = new AdminController();
+        $controller->dashboard();
+        break;
+    case '/admin/products':
+        $controller = new AdminController();
+        $controller->products();
+        break;
+    case '/admin/products/store':
+        $controller = new AdminController();
+        $controller->storeProduct();
+        break;
+    case '/admin/products/delete':
+        $controller = new AdminController();
+        $controller->deleteProduct();
+        break;
+    case '/admin/orders':
+        $controller = new AdminController();
+        $controller->orders();
+        break;
+    case '/admin/orders/view':
+        $controller = new AdminController();
+        $controller->orderDetails();
+        break;
+    case '/admin/orders/update-status':
+        $controller = new AdminController();
+        $controller->updateOrderStatus();
+        break;
+    case '/admin/coupons':
+        $controller = new AdminController();
+        $controller->coupons();
+        break;
+    case '/admin/coupons/store':
+        $controller = new AdminController();
+        $controller->storeCoupon();
+        break;
+    case '/admin/coupons/delete':
+        $controller = new AdminController();
+        $controller->deleteCoupon();
+        break;
+
+    // User Routes
+    case '/user/orders':
+        $controller = new UserController();
+        $controller->orders();
+        break;
+    case '/user/profile':
+        $controller = new UserController();
+        $controller->profile();
+        break;
+    case '/user/profile/update':
+        $controller = new UserController();
+        $controller->updateProfile();
         break;
 
     default:
