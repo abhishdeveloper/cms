@@ -87,6 +87,12 @@ class CheckoutController
                     "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
                     [$orderId, $item['product_id'], $item['quantity'], $item['price']]
                 );
+
+                // Decrement stock
+                $this->db->query(
+                    "UPDATE products SET stock = stock - ? WHERE id = ?",
+                    [$item['quantity'], $item['product_id']]
+                );
             }
 
             // Create Razorpay Order

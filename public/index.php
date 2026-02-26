@@ -16,7 +16,36 @@ if ($requestUri !== '/' && substr($requestUri, -1) === '/') {
 // Basic Routing Logic
 switch ($requestUri) {
     case '/':
-        echo "<h1>Welcome to the E-Commerce Store</h1>";
+        $controller = new HomeController();
+        $controller->index();
+        break;
+
+    case '/cart':
+        require_once __DIR__ . '/../views/cart.php';
+        break;
+
+    case '/success':
+        require_once __DIR__ . '/../views/success.php';
+        break;
+
+    case '/api/login':
+        if ($requestMethod === 'POST') {
+            $controller = new AuthController();
+            $controller->login();
+        } else {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+        }
+        break;
+
+    case '/api/verify':
+        if ($requestMethod === 'POST') {
+            $controller = new AuthController();
+            $controller->verify();
+        } else {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+        }
         break;
 
     case '/checkout':
