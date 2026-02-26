@@ -54,7 +54,11 @@
             <p class="text-gray-700 leading-relaxed mb-8"><?= nl2br(htmlspecialchars($product['description'])) ?></p>
 
             <div class="flex items-center gap-4">
-                <?php if ($product['stock'] > 0): ?>
+                <?php if ($product['is_quote_only']): ?>
+                    <button onclick="document.getElementById('quote-modal').classList.remove('hidden')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors">
+                        Request a Custom Quote
+                    </button>
+                <?php elseif ($product['stock'] > 0): ?>
                     <button class="add-to-cart-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
                             data-id="<?= $product['id'] ?>"
                             data-name="<?= htmlspecialchars($product['name']) ?>"
@@ -144,7 +148,69 @@
     </div>
 </main>
 
+<!-- Quote Modal -->
+<div id="quote-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full relative">
+        <button onclick="document.getElementById('quote-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <h2 class="text-2xl font-bold mb-4">Request a Quote</h2>
+        <form id="quote-form">
+            <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Name</label>
+                <input type="text" name="name" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Phone</label>
+                <input type="tel" name="phone" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Email</label>
+                <input type="email" name="email" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Budget Range</label>
+                <select name="budget" class="w-full border rounded p-2">
+                    <option value="< 10k">Less than ₹10,000</option>
+                    <option value="10k-50k">₹10,000 - ₹50,000</option>
+                    <option value="50k-1L">₹50,000 - ₹1 Lakh</option>
+                    <option value="> 1L">More than ₹1 Lakh</option>
+                </select>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-bold mb-2">Requirements</label>
+                <textarea name="requirements" class="w-full border rounded p-2" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded">Submit Request</button>
+        </form>
+    </div>
+</div>
+
 <script>
+    document.getElementById('quote-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/quote/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+
+            if (result.error) throw new Error(result.error);
+
+            alert(result.message);
+            document.getElementById('quote-modal').classList.add('hidden');
+            this.reset();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', function() {
             const id = parseInt(this.getAttribute('data-id'));

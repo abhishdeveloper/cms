@@ -55,6 +55,16 @@ switch ($requestUri) {
         $controller->category();
         break;
 
+    case '/quote/submit':
+        if ($requestMethod === 'POST') {
+            $controller = new QuotationController();
+            $controller->submit();
+        } else {
+            http_response_code(405);
+            echo "Method Not Allowed";
+        }
+        break;
+
     case '/cart':
         require_once __DIR__ . '/../views/cart.php';
         break;
@@ -183,6 +193,14 @@ switch ($requestUri) {
     case '/admin/orders/update-status':
         $controller = new AdminController();
         $controller->updateOrderStatus();
+        break;
+    case '/admin/quotations':
+        $controller = new AdminController();
+        $controller->quotations();
+        break;
+    case '/admin/quotations/update':
+        $controller = new AdminController();
+        $controller->updateQuotationStatus();
         break;
     case '/admin/coupons':
         $controller = new AdminController();

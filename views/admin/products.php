@@ -25,6 +25,10 @@
                 <?php endforeach; ?>
             </select>
         </div>
+        <div class="flex items-center mt-6">
+            <input type="checkbox" name="is_quote_only" id="is_quote_only" class="mr-2 h-5 w-5">
+            <label for="is_quote_only" class="text-sm font-bold">Quote Only (B2B)</label>
+        </div>
         <div>
             <label class="block text-sm font-bold mb-2">Stock</label>
             <input type="number" name="stock" class="w-full border p-2 rounded" required>

@@ -125,6 +125,7 @@ class AdminController
         $description = $_POST['description'];
         $stock = $_POST['stock'];
         $categoryId = $_POST['category_id'] ?: null;
+        $isQuoteOnly = isset($_POST['is_quote_only']) ? 1 : 0;
         $imageUrl = '';
         $galleryImages = [];
 
@@ -155,11 +156,26 @@ class AdminController
         $galleryJson = json_encode($galleryImages);
 
         $this->db->query(
-            "INSERT INTO products (name, price, description, stock, image_url, category_id, gallery_images) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [$name, $price, $description, $stock, $imageUrl, $categoryId, $galleryJson]
+            "INSERT INTO products (name, price, description, stock, image_url, category_id, gallery_images, is_quote_only) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [$name, $price, $description, $stock, $imageUrl, $categoryId, $galleryJson, $isQuoteOnly]
         );
 
         header('Location: /admin/products');
+    }
+
+    public function quotations()
+    {
+        $stmt = $this->db->query("SELECT q.*, p.name as product_name FROM quotations q JOIN products p ON q.product_id = p.id ORDER BY q.created_at DESC");
+        $quotations = $stmt->fetchAll();
+        require __DIR__ . '/../views/admin/quotations.php';
+    }
+
+    public function updateQuotationStatus()
+    {
+        $id = $_POST['id'];
+        $status = $_POST['status'];
+        $this->db->query("UPDATE quotations SET status = ? WHERE id = ?", [$status, $id]);
+        header('Location: /admin/quotations');
     }
 
     public function deleteProduct()

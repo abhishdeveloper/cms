@@ -15,6 +15,7 @@
         <a href="/admin/categories" class="block py-2 px-4 rounded hover:bg-gray-700">Categories</a>
         <a href="/admin/products" class="block py-2 px-4 rounded hover:bg-gray-700">Products</a>
         <a href="/admin/orders" class="block py-2 px-4 rounded hover:bg-gray-700">Orders</a>
+        <a href="/admin/quotations" class="block py-2 px-4 rounded hover:bg-gray-700">Quotations</a>
         <a href="/admin/coupons" class="block py-2 px-4 rounded hover:bg-gray-700">Coupons</a>
     </nav>
     <div class="p-4 border-t border-gray-700">
