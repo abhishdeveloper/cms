@@ -29,6 +29,9 @@
                 <?php if ($order['razorpay_order_id']): ?>
                     <p>Transaction ID: <span class="font-mono"><?= $order['razorpay_order_id'] ?></span></p>
                 <?php endif; ?>
+                <?php if ($order['payment_status'] === 'paid'): ?>
+                    <a href="/download_invoice.php?id=<?= $order['id'] ?>" class="mt-2 inline-block text-blue-600 hover:underline">Download Invoice (PDF)</a>
+                <?php endif; ?>
             </div>
         </div>
     <?php endforeach; ?>

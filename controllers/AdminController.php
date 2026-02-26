@@ -108,10 +108,15 @@ class AdminController
         $this->db->query("UPDATE orders SET order_status = ? WHERE id = ?", [$status, $id]);
 
         if ($status === 'shipped') {
-            $stmt = $this->db->query("SELECT u.phone, u.name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?", [$id]);
+            $stmt = $this->db->query("SELECT u.phone, u.name, u.email FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?", [$id]);
             $user = $stmt->fetch();
             if ($user) {
                 $this->whatsapp->sendMessage($user['phone'], "Hello {$user['name']}, your order #{$id} has been shipped!");
+
+                if (!empty($user['email'])) {
+                    $emailService = new EmailService();
+                    $emailService->sendOrderUpdate($user['email'], $user['name'], "Order #{$id} Shipped", "<p>Good news! Your order #{$id} has been shipped.</p>");
+                }
             }
         }
 

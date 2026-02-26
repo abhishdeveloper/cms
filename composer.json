@@ -1,0 +1,14 @@
+{
+    "require": {
+        "dompdf/dompdf": "^2.0",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "autoload": {
+        "classmap": [
+            "controllers/",
+            "models/",
+            "services/",
+            "middleware/"
+        ]
+    }
+}

@@ -12,4 +12,12 @@ return [
         'webhook_secret' => getenv('RAZORPAY_WEBHOOK_SECRET') ?: '',
         'api_base_url' => 'https://api.razorpay.com/v1/',
     ],
+    'smtp' => [
+        'host' => getenv('MAIL_HOST') ?: 'smtp.example.com',
+        'port' => getenv('MAIL_PORT') ?: 587,
+        'username' => getenv('MAIL_USER') ?: '',
+        'password' => getenv('MAIL_PASS') ?: '',
+        'from_email' => getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ecommerce.com',
+        'from_name' => getenv('MAIL_FROM_NAME') ?: 'E-Commerce Store',
+    ],
 ];

@@ -93,16 +93,32 @@
 
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-white p-4 rounded shadow-sm border";
-                div.innerHTML = `
-                    <div>
-                        <h3 class="font-semibold text-lg">${item.name}</h3>
-                        <p class="text-gray-600">₹${item.price} x ${item.quantity}</p>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="font-bold mr-4">₹${itemTotal.toFixed(2)}</span>
-                        <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700">Remove</button>
-                    </div>
-                `;
+
+                // Create elements safely to avoid XSS
+                const leftDiv = document.createElement('div');
+                const h3 = document.createElement('h3');
+                h3.className = "font-semibold text-lg";
+                h3.textContent = item.name;
+                const p = document.createElement('p');
+                p.className = "text-gray-600";
+                p.textContent = `₹${item.price} x ${item.quantity}`;
+                leftDiv.appendChild(h3);
+                leftDiv.appendChild(p);
+
+                const rightDiv = document.createElement('div');
+                rightDiv.className = "flex items-center";
+                const span = document.createElement('span');
+                span.className = "font-bold mr-4";
+                span.textContent = `₹${itemTotal.toFixed(2)}`;
+                const btn = document.createElement('button');
+                btn.className = "text-red-500 hover:text-red-700";
+                btn.textContent = "Remove";
+                btn.onclick = function() { removeItem(index); };
+                rightDiv.appendChild(span);
+                rightDiv.appendChild(btn);
+
+                div.appendChild(leftDiv);
+                div.appendChild(rightDiv);
                 container.appendChild(div);
             });
 

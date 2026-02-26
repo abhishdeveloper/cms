@@ -63,6 +63,26 @@ if (isset($data['event']) && $data['event'] === 'payment.captured') {
                 $db->query("UPDATE coupons SET times_used = times_used + 1 WHERE code = ?", [$couponCode]);
             }
 
+            // Generate Invoice & Send Email
+            try {
+                $invoiceService = new InvoiceService();
+                $pdfPath = $invoiceService->generateInvoice($orderId);
+
+                $stmt = $db->query("SELECT phone, name, email FROM users WHERE id = ?", [$userId]);
+                $user = $stmt->fetch();
+
+                if ($user) {
+                    $emailService = new EmailService();
+                    $subject = "Order #{$orderId} Confirmed";
+                    $body = "<h1>Thank you for your order!</h1><p>Your payment has been received. Please find your invoice attached.</p>";
+                    if (!empty($user['email'])) {
+                        $emailService->sendOrderUpdate($user['email'], $user['name'], $subject, $body, $pdfPath);
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("Invoice/Email Error: " . $e->getMessage());
+            }
+
             // Get User Phone
             $stmt = $db->query("SELECT phone, name FROM users WHERE id = ?", [$userId]);
             $user = $stmt->fetch();
