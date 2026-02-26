@@ -51,7 +51,7 @@ class ProductController
                 SELECT count(*) as count
                 FROM order_items oi
                 JOIN orders o ON oi.order_id = o.id
-                WHERE o.user_id = ? AND oi.product_id = ? AND o.order_status = 'completed'
+                WHERE o.user_id = ? AND oi.product_id = ? AND o.order_status IN ('completed', 'delivered')
             ", [$userId, $id]);
             $purchaseCount = $stmt->fetch()['count'];
 

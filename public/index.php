@@ -36,6 +36,15 @@ switch ($requestUri) {
         }
         break;
 
+    case '/webhook/whatsapp':
+        if ($requestMethod === 'POST') {
+            require_once __DIR__ . '/whatsapp_reply_webhook.php';
+        } else {
+            http_response_code(405);
+            echo "Method Not Allowed";
+        }
+        break;
+
     case '/search':
         $controller = new SearchController();
         $controller->index();
