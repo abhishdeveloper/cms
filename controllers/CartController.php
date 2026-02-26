@@ -22,31 +22,74 @@ class CartController
         $userId = $_SESSION['user_id'];
         $input = json_decode(file_get_contents('php://input'), true);
 
-        if (!isset($input['cart_items']) || empty($input['cart_items'])) {
-            // If cart is empty, maybe we should mark existing as converted or deleted?
-            // For now, let's just ignore empty payloads
+        if (!isset($input['cart_items']) || !is_array($input['cart_items'])) {
             echo json_encode(['status' => 'ignored']);
             return;
         }
 
-        $cartData = json_encode($input['cart_items']);
+        $cartItems = $input['cart_items'];
+        $totalAmount = 0;
 
         try {
-            // Check if there's a pending abandoned cart for this user
-            $stmt = $this->db->query("SELECT id FROM abandoned_carts WHERE user_id = ? AND status = 'pending'", [$userId]);
-            $existing = $stmt->fetch();
+            $conn = $this->db->getConnection();
+            $conn->beginTransaction();
 
-            if ($existing) {
-                // Update existing
-                $this->db->query("UPDATE abandoned_carts SET cart_data = ?, updated_at = NOW() WHERE id = ?", [$cartData, $existing['id']]);
+            // Check for existing DRAFT order
+            $stmt = $this->db->query(
+                "SELECT id FROM orders WHERE user_id = ? AND order_status = 'draft'",
+                [$userId]
+            );
+            $existingOrder = $stmt->fetch();
+
+            if ($existingOrder) {
+                $orderId = $existingOrder['id'];
+
+                // Clear existing items for this draft order
+                $this->db->query("DELETE FROM order_items WHERE order_id = ?", [$orderId]);
             } else {
-                // Create new
-                $this->db->query("INSERT INTO abandoned_carts (user_id, cart_data, status) VALUES (?, ?, 'pending')", [$userId, $cartData]);
+                // Create new DRAFT order
+                $this->db->query(
+                    "INSERT INTO orders (user_id, total_amount, payment_status, order_status, created_at, updated_at)
+                     VALUES (?, 0, 'pending', 'draft', NOW(), NOW())",
+                    [$userId]
+                );
+                $orderId = $conn->lastInsertId();
             }
 
-            echo json_encode(['status' => 'tracked']);
+            // Insert new items and calculate total
+            foreach ($cartItems as $item) {
+                $productId = (int)$item['product_id'];
+                $quantity = (int)$item['quantity'];
+
+                // Validate product exists and get price
+                $prodStmt = $this->db->query("SELECT price FROM products WHERE id = ?", [$productId]);
+                $product = $prodStmt->fetch();
+
+                if ($product) {
+                    $price = $product['price'];
+                    $lineTotal = $price * $quantity;
+                    $totalAmount += $lineTotal;
+
+                    $this->db->query(
+                        "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
+                        [$orderId, $productId, $quantity, $price]
+                    );
+                }
+            }
+
+            // Update order total and timestamp
+            $this->db->query(
+                "UPDATE orders SET total_amount = ?, updated_at = NOW(), recovery_message_sent = 0 WHERE id = ?",
+                [$totalAmount, $orderId]
+            );
+
+            $conn->commit();
+            echo json_encode(['status' => 'tracked', 'order_id' => $orderId]);
 
         } catch (Exception $e) {
+            if ($conn->inTransaction()) {
+                $conn->rollBack();
+            }
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
         }
