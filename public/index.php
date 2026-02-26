@@ -210,6 +210,14 @@ switch ($requestUri) {
         $controller = new AdminController();
         $controller->deleteCategory();
         break;
+    case '/admin/categories/edit':
+        $controller = new AdminController();
+        $controller->editCategory();
+        break;
+    case '/admin/categories/update':
+        $controller = new AdminController();
+        $controller->updateCategory();
+        break;
     case '/admin/products':
         $controller = new AdminController();
         $controller->products();
@@ -221,6 +229,14 @@ switch ($requestUri) {
     case '/admin/products/delete':
         $controller = new AdminController();
         $controller->deleteProduct();
+        break;
+    case '/admin/products/edit':
+        $controller = new AdminController();
+        $controller->editProduct();
+        break;
+    case '/admin/products/update':
+        $controller = new AdminController();
+        $controller->updateProduct();
         break;
     case '/admin/orders':
         $controller = new AdminController();
@@ -253,6 +269,14 @@ switch ($requestUri) {
     case '/admin/coupons/delete':
         $controller = new AdminController();
         $controller->deleteCoupon();
+        break;
+    case '/admin/coupons/edit':
+        $controller = new AdminController();
+        $controller->editCoupon();
+        break;
+    case '/admin/coupons/update':
+        $controller = new AdminController();
+        $controller->updateCoupon();
         break;
 
     // User Routes

@@ -54,10 +54,11 @@
                 <td class="p-3"><?= $coupon['type'] === 'percentage' ? $coupon['discount_value'] . '%' : '₹' . $coupon['discount_value'] ?></td>
                 <td class="p-3"><?= $coupon['expires_at'] ?></td>
                 <td class="p-3"><?= $coupon['times_used'] ?> / <?= $coupon['usage_limit'] ?: '∞' ?></td>
-                <td class="p-3">
+                <td class="p-3 flex space-x-4">
+                    <a href="/admin/coupons/edit?id=<?= $coupon['id'] ?>" class="text-blue-600 hover:underline">Edit</a>
                     <form action="/admin/coupons/delete" method="POST" onsubmit="return confirm('Delete?');">
                         <input type="hidden" name="id" value="<?= $coupon['id'] ?>">
-                        <button type="submit" class="text-red-600">Delete</button>
+                        <button type="submit" class="text-red-600 hover:underline">Delete</button>
                     </form>
                 </td>
             </tr>

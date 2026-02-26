@@ -64,10 +64,11 @@
                 <td class="p-3"><?= htmlspecialchars($product['name']) ?></td>
                 <td class="p-3">₹<?= $product['price'] ?></td>
                 <td class="p-3"><?= $product['stock'] ?></td>
-                <td class="p-3">
+                <td class="p-3 flex space-x-4">
+                    <a href="/admin/products/edit?id=<?= $product['id'] ?>" class="text-blue-600 hover:underline">Edit</a>
                     <form action="/admin/products/delete" method="POST" onsubmit="return confirm('Delete?');">
                         <input type="hidden" name="id" value="<?= $product['id'] ?>">
-                        <button type="submit" class="text-red-600">Delete</button>
+                        <button type="submit" class="text-red-600 hover:underline">Delete</button>
                     </form>
                 </td>
             </tr>

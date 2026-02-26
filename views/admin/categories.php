@@ -37,10 +37,11 @@
                 </td>
                 <td class="p-3"><?= htmlspecialchars($cat['name']) ?></td>
                 <td class="p-3"><?= htmlspecialchars($cat['slug']) ?></td>
-                <td class="p-3">
+                <td class="p-3 flex space-x-4">
+                    <a href="/admin/categories/edit?id=<?= $cat['id'] ?>" class="text-blue-600 hover:underline">Edit</a>
                     <form action="/admin/categories/delete" method="POST" onsubmit="return confirm('Delete?');">
                         <input type="hidden" name="id" value="<?= $cat['id'] ?>">
-                        <button type="submit" class="text-red-600">Delete</button>
+                        <button type="submit" class="text-red-600 hover:underline">Delete</button>
                     </form>
                 </td>
             </tr>
