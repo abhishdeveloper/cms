@@ -14,6 +14,46 @@ if ($requestUri !== '/' && substr($requestUri, -1) === '/') {
     $requestUri = rtrim($requestUri, '/');
 }
 
+// API V1 Routing
+if (strpos($requestUri, '/api/v1/') === 0) {
+    $path = substr($requestUri, 7); // Remove /api/v1
+
+    // Auth Routes
+    if ($path === '/login' && $requestMethod === 'POST') {
+        $controller = new AuthApiController();
+        $controller->login();
+        exit;
+    }
+    if ($path === '/register' && $requestMethod === 'POST') {
+        $controller = new AuthApiController();
+        $controller->register();
+        exit;
+    }
+
+    // Product Routes
+    if ($path === '/products' && $requestMethod === 'GET') {
+        $controller = new ProductApiController();
+        $controller->index();
+        exit;
+    }
+    if (preg_match('#^/products/(\d+)$#', $path, $matches) && $requestMethod === 'GET') {
+        $controller = new ProductApiController();
+        $controller->show($matches[1]);
+        exit;
+    }
+
+    // Checkout Routes
+    if ($path === '/checkout/initiate' && $requestMethod === 'POST') {
+        $controller = new CheckoutApiController();
+        $controller->initiate();
+        exit;
+    }
+
+    http_response_code(404);
+    echo json_encode(['error' => 'API endpoint not found']);
+    exit;
+}
+
 // Basic Routing Logic
 switch ($requestUri) {
     case '/':
