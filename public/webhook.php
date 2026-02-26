@@ -47,15 +47,21 @@ if (isset($data['event']) && $data['event'] === 'payment.captured') {
         $db = Database::getInstance();
 
         // Find order
-        $stmt = $db->query("SELECT id, user_id FROM orders WHERE razorpay_order_id = ?", [$razorpayOrderId]);
+        $stmt = $db->query("SELECT id, user_id, coupon_code FROM orders WHERE razorpay_order_id = ?", [$razorpayOrderId]);
         $order = $stmt->fetch();
 
         if ($order) {
             $orderId = $order['id'];
             $userId = $order['user_id'];
+            $couponCode = $order['coupon_code'] ?? null;
 
             // Update Order Status
             $db->query("UPDATE orders SET payment_status = 'paid', order_status = 'processing' WHERE id = ?", [$orderId]);
+
+            // Increment Coupon Usage
+            if (!empty($couponCode)) {
+                $db->query("UPDATE coupons SET times_used = times_used + 1 WHERE code = ?", [$couponCode]);
+            }
 
             // Get User Phone
             $stmt = $db->query("SELECT phone, name FROM users WHERE id = ?", [$userId]);

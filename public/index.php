@@ -58,6 +58,16 @@ switch ($requestUri) {
         }
         break;
 
+    case '/api/apply-coupon':
+        if ($requestMethod === 'POST') {
+            $controller = new CheckoutController();
+            $controller->applyCoupon();
+        } else {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+        }
+        break;
+
     case '/checkout':
         if ($requestMethod === 'POST') {
             $controller = new CheckoutController();

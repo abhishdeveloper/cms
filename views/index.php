@@ -1,4 +1,4 @@
-<?php include 'header.php'; ?>
+<?php include __DIR__ . '/header.php'; ?>
 
 <h1 class="text-3xl font-bold mb-6 text-gray-800">Our Products</h1>
 
@@ -38,4 +38,4 @@
     });
 </script>
 
-<?php include 'footer.php'; ?>
+<?php include __DIR__ . '/footer.php'; ?>

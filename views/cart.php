@@ -1,4 +1,4 @@
-<?php include 'header.php'; ?>
+<?php include __DIR__ . '/header.php'; ?>
 
     <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mt-6">
         <h1 class="text-3xl font-bold mb-6 text-gray-800">Your Cart</h1>
@@ -15,6 +15,17 @@
             <div class="flex justify-between items-center text-xl font-bold mb-6">
                 <span>Total</span>
                 <span id="cart-total" class="text-green-600">₹0.00</span>
+            </div>
+
+            <div id="coupon-section" class="mb-6 p-4 border rounded-lg bg-yellow-50">
+                <label for="coupon_code" class="block text-gray-700 text-sm font-bold mb-2">Have a coupon?</label>
+                <div class="flex">
+                    <input type="text" id="coupon_code" placeholder="Enter code" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2">
+                    <button onclick="applyCoupon()" id="btn-apply-coupon" class="bg-purple-600 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Apply
+                    </button>
+                </div>
+                <p id="coupon-message" class="text-sm mt-2 hidden"></p>
             </div>
 
             <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
@@ -55,6 +66,7 @@
     <script>
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let userId = null;
+        let appliedCoupon = null;
         const razorpayKey = "<?= getenv('RAZORPAY_KEY_ID') ?>"; // In production, pass securely
 
         function renderCart() {
@@ -174,14 +186,56 @@
             }
         }
 
+        async function applyCoupon() {
+            if (!userId) return alert('Please verify your phone number first');
+
+            const code = document.getElementById('coupon_code').value;
+            const msgEl = document.getElementById('coupon-message');
+
+            if (!code) return alert('Enter a coupon code');
+
+            try {
+                const res = await fetch('/api/apply-coupon', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ cart_items: cart, code: code })
+                });
+
+                const data = await res.json();
+                msgEl.classList.remove('hidden');
+
+                if (data.error) {
+                    msgEl.className = 'text-sm mt-2 text-red-600';
+                    msgEl.innerText = data.error;
+                    appliedCoupon = null;
+                } else {
+                    msgEl.className = 'text-sm mt-2 text-green-600';
+                    msgEl.innerText = `Success! Saved ₹${data.discount.toFixed(2)}`;
+
+                    document.getElementById('cart-total').innerHTML = `
+                        <span class="line-through text-gray-400 text-sm">₹${data.original_total.toFixed(2)}</span>
+                        <span class="text-green-600">₹${data.final_total.toFixed(2)}</span>
+                    `;
+                    appliedCoupon = code;
+                }
+            } catch (e) {
+                alert('Failed to apply coupon');
+            }
+        }
+
         async function proceedToCheckout() {
             if (!userId) return alert('Please verify first');
 
             try {
+                const payload = {
+                    cart_items: cart,
+                    coupon_code: appliedCoupon
+                };
+
                 const res = await fetch('/checkout', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ cart_items: cart })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await res.json();
@@ -215,4 +269,4 @@
         renderCart();
     </script>
 
-<?php include 'footer.php'; ?>
+<?php include __DIR__ . '/footer.php'; ?>
